@@ -2,12 +2,12 @@
 local MonitorSide = "left"
 local Capacitance = 1.6 -- capacitance in uF
 
-function VoltageToJoules(voltage)
+function StageVoltageToJoules(voltage)
   return (0.5 * Capacitance * (voltage ^ 2))
 end
 
 function SignalToVoltage(signalA, signalB)
-  return (( 250 / 255 * ((16 * signalA) + signalB)) * 1000)
+  return ( 250 / 255 * ((16 * signalA) + signalB))
 end
 
 function SafeDistancePhysical(joules)
@@ -28,7 +28,7 @@ function IsValueCloser(targetVal, currentVal, testVal)
   return false
 end
 
-function SolveForJoules(targetJoules)
+function SolveForJoules(targetJoules, numStages)
   local closestA = -1
   local closestB = -1
   local closestJoules = -1
@@ -38,7 +38,7 @@ function SolveForJoules(targetJoules)
     for j = 0, 15, 1
     do
       local tempVolts = SignalToVoltage(i, j)
-      local tempJoules = VoltageToJoules(tempVolts)
+      local tempJoules = StageVoltageToJoules(tempVolts) * numStages
       if closestJoules == -1 or IsValueCloser(targetJoules, closestJoules, tempJoules) then
         closestJoules = tempJoules
         closestA = i
@@ -119,14 +119,14 @@ while true do
   elseif selection == "2" then
     displayTargetJoules = GetUserInput("Target Joules")
     print("Calculating Closest Joules, this may take a moment.")
-    displayA, displayB, displayClosestJoules = SolveForJoules(displayTargetJoules)
+    displayA, displayB, displayClosestJoules = SolveForJoules(displayTargetJoules, displayNumStages)
     displayVoltage = SignalToVoltage(displayA, displayB)
     print("Done!")
   elseif selection == "3" then
     displayA = GetUserInput("Signal A")
     displayB = GetUserInput("Signal B")
     displayVoltage = SignalToVoltage(displayA, displayB)
-    displayTargetJoules = VoltageToJoules(displayVoltage)
+    displayTargetJoules = StageVoltageToJoules(displayVoltage) * displayNumStages
     displayClosestJoules = displayTargetJoules
   elseif selection == "4" then
     displayNumStages = -1
@@ -141,5 +141,5 @@ while true do
     print("Invalid Menu Option")
   end
   RefreshMonitor()
-  sleep(3)
+  sleep(1)
 end
