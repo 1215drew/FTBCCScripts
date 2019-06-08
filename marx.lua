@@ -7,7 +7,7 @@ function VoltageToJoules(voltage)
 end
 
 function SignalToVoltage(signalA, signalB)
-  return ( 250 / 255 * ((16 * signalA) + signalB))
+  return (( 250 / 255 * ((16 * signalA) + signalB)) * 1000)
 end
 
 function SafeDistancePhysical(joules)
@@ -106,7 +106,7 @@ while true do
   if selection == "1" then
     displayNumStages = GetUserInput("Capacitor Stages")
     displayMaxVoltage = (250000 * displayNumStages)
-    displayMinVoltage = math.Max((displayMaxVoltage * 0.3), 125000)
+    displayMinVoltage = math.max((displayMaxVoltage * 0.3), 125000)
   elseif selection == "2" then
     displayTargetJoules = GetUserInput("Target Joules")
     print("Calculating Closest Joules, this may take a moment.")
