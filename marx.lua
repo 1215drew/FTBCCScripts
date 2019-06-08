@@ -52,7 +52,12 @@ end
 
 function GetUserInput(name)
   print("Enter value for "..name)
-  return read()
+  return tonumber(read())
+end
+
+function MonitorNewline(mon)
+  local _,cY = mon.getCursorPos()
+  mon.setCursorPos(1, cY+1)
 end
 
 -- Main Program
@@ -70,15 +75,24 @@ local monitor = peripheral.wrap(MonitorSide)
 while true do
   print("Marx Generator Firing Computer")
   
-  monitor.write("Marx Generator Firing Computer\n")
-  monitor.write("Num Stages: "..tostring(displayNumStages).."\n")
-  monitor.write("Signal A: "..tostring(displayA).."\n")
-  monitor.write("Signal B: "..tostring(displayB).."\n")
-  monitor.write("Target Joules: "..tostring(displayTargetJoules).."\n")
-  monitor.write("Closest Joules: "..tostring(displayClosestJoules).."\n")
-  monitor.write("Voltage: "..tostring(displayVoltage).."\n")
-  monitor.write("Max Voltage: "..tostring(displayMaxVoltage).."\n")
-  monitor.write("Min Voltage: "..tostring(displayMinVoltage).."\n")
+  monitor.write("Marx Generator Firing Computer")
+  MonitorNewline(monitor)
+  monitor.write("Num Stages: "..tostring(displayNumStages))
+  MonitorNewline(monitor)
+  monitor.write("Signal A: "..tostring(displayA))
+  MonitorNewline(monitor)
+  monitor.write("Signal B: "..tostring(displayB))
+  MonitorNewline(monitor)
+  monitor.write("Target Joules: "..tostring(displayTargetJoules))
+  MonitorNewline(monitor)
+  monitor.write("Closest Joules: "..tostring(displayClosestJoules))
+  MonitorNewline(monitor)
+  monitor.write("Voltage: "..tostring(displayVoltage))
+  MonitorNewline(monitor)
+  monitor.write("Max Voltage: "..tostring(displayMaxVoltage))
+  MonitorNewline(monitor)
+  monitor.write("Min Voltage: "..tostring(displayMinVoltage))
+  MonitorNewline(monitor)
   
   print("Main Menu")
   print(" 1) Set Number of Capacitor Stages")
@@ -89,23 +103,23 @@ while true do
   print("Enter Selection:")
   local selection = read()
   
-  if selection == 1 then
+  if selection == "1" then
     displayNumStages = GetUserInput("Capacitor Stages")
     displayMaxVoltage = (250000 * displayNumStages)
     displayMinVoltage = math.Max((displayMaxVoltage * 0.3), 125000)
-  elseif selection == 1 then
+  elseif selection == "2" then
     displayTargetJoules = GetUserInput("Target Joules")
     print("Calculating Closest Joules, this may take a moment.")
     displayA, displayB, displayClosestJoules = SolveForJoules(displayTargetJoules)
     displayVoltage = SignalToVoltage(displayA, displayB)
     print("Done!")
-  elseif selection == 3 then
+  elseif selection == "3" then
     displayA = GetUserInput("Signal A")
     displayB = GetUserInput("Signal B")
     displayVoltage = SignalToVoltage(displayA, displayB)
     displayTargetJoules = VoltageToJoules(displayVoltage)
     displayClosestJoules = displayTargetJoules
-  elseif selection == 4 then
+  elseif selection == "4" then
     displayNumStages = -1
     displayA = -1
     displayB = -1
@@ -122,5 +136,6 @@ while true do
   
   monitor.clear()
   term.clear()
+  monitor.setCursorPos(1,1)
   term.setCursorPos(1,1)
 end
