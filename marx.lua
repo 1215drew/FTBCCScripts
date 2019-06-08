@@ -72,9 +72,9 @@ local displayMinVoltage = -1
 
 local monitor = peripheral.wrap(MonitorSide)
 
-while true do
-  print("Marx Generator Firing Computer")
-  
+function RefreshMonitor()
+  monitor.clear()
+  monitor.setCursorPos(1,1)
   monitor.write("Marx Generator Firing Computer")
   MonitorNewline(monitor)
   monitor.write("Num Stages: "..tostring(displayNumStages))
@@ -93,6 +93,15 @@ while true do
   MonitorNewline(monitor)
   monitor.write("Min Voltage: "..tostring(displayMinVoltage))
   MonitorNewline(monitor)
+end
+
+while true do
+  term.clear()
+  term.setCursorPos(1,1)
+  
+  print("Marx Generator Firing Computer")
+  
+  RefreshMonitor()
   
   print("Main Menu")
   print(" 1) Set Number of Capacitor Stages")
@@ -131,11 +140,6 @@ while true do
   else
     print("Invalid Menu Option")
   end
-  
+  RefreshMonitor()
   sleep(3)
-  
-  monitor.clear()
-  term.clear()
-  monitor.setCursorPos(1,1)
-  term.setCursorPos(1,1)
 end
