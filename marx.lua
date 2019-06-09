@@ -125,12 +125,12 @@ function RefreshMonitor()
   MonitorNewline(monitor)
   monitor.write("Closest Joules: "..tostring(math.floor(displayClosestJoules / 100) / 10).." kJ")
   MonitorNewline(monitor)
-  if displayStageVoltage < 125000 then
+  if displayStageVoltage < 125000 or displayStageVoltage >= 242000 then
     monitor.setTextColor(colors.orange)
   end
   monitor.write("Per Stage Voltage: "..tostring(math.floor(displayStageVoltage / 100) / 10).." kV")
   MonitorNewline(monitor)
-  monitor.write("Min Stage Voltage: 125 kV")
+  monitor.write("Stage Volt. Range: 125 - 241 kV")
   MonitorNewline(monitor)
   monitor.setTextColor(colors.white)
   if (displayStageVoltage * displayNumStages) < displayMinTotalVoltage or (displayStageVoltage * displayNumStages) > displayMaxTotalVoltage then
@@ -138,11 +138,9 @@ function RefreshMonitor()
   end
   monitor.write("Total Voltage: "..tostring(math.floor(displayStageVoltage * displayNumStages / 100) / 10).." kV")
   MonitorNewline(monitor)
-  monitor.write("Max Total Voltage: "..tostring(math.floor(displayMaxTotalVoltage / 100) / 10).." kV")
-  MonitorNewline(monitor)
-  monitor.write("Min Total Voltage: "..tostring(math.floor(displayMinTotalVoltage / 100 ) / 10).." kV")
+  monitor.write("Total Volt. Range: "..tostring(math.floor(displayMinTotalVoltage / 100) / 10).." - "..tostring(math.floor(displayMaxTotalVoltage / 100 ) / 10).." kV")
   monitor.setTextColor(colors.white)
-  if displayStageVoltage < 125000 or (displayStageVoltage * displayNumStages) < displayMinTotalVoltage or (displayStageVoltage * displayNumStages) > displayMaxTotalVoltage then
+  if displayStageVoltage < 125000 or displayStageVoltage >= 242000 or (displayStageVoltage * displayNumStages) < displayMinTotalVoltage or (displayStageVoltage * displayNumStages) > displayMaxTotalVoltage then
     MonitorNewline(monitor)
     monitor.setTextColor(colors.orange)
     monitor.write("ERROR: VOLTAGE OUT OF BOUNDS")
