@@ -3,11 +3,11 @@ local MonitorSide = "left"
 local Capacitance = 1.6 -- capacitance in uF
 
 function StageVoltageToJoules(voltage)
-  return (0.5 * Capacitance * (voltage ^ 2))
+  return (0.5 * Capacitance * ((voltage/1000) ^ 2))
 end
 
 function SignalToVoltage(signalA, signalB)
-  return ( 250 / 255 * ((16 * signalA) + signalB))
+  return (( 250 / 255 * ((16 * signalA) + signalB)) * 1000)
 end
 
 function SafeDistancePhysical(joules)
@@ -52,7 +52,7 @@ end
 
 function GetUserInput(name)
   print("Enter value for "..name)
-  return tonumber(read())
+  return read()
 end
 
 function MonitorNewline(mon)
@@ -60,15 +60,53 @@ function MonitorNewline(mon)
   mon.setCursorPos(1, cY+1)
 end
 
+function signaltostring(signal)
+  if signal >= 0 and signal <= 9 then
+    return tostring(signal)
+  elseif signal == 10 then
+    return "A"
+  elseif signal == 11 then
+    return "B"
+  elseif signal == 12 then
+    return "C"
+  elseif signal == 13 then
+    return "D"
+  elseif signal == 14 then
+    return "E"
+  elseif signal == 15 then
+    return "F"
+  else
+    return -1
+  end
+end
+
+function stringtosignal(signal)
+  if signal == "a" or signal == "A" then
+    return 10
+  elseif signal == "b" or signal == "B" then
+    return 11
+  elseif signal == "c" or signal == "C" then
+    return 12
+  elseif signal == "d" or signal == "D" then
+    return 13
+  elseif signal == "e" or signal == "E" then
+    return 14
+  elseif signal == "f" or signal == "F" then
+    return 15
+  else
+    return tonumber(signal)
+  end
+end
+
 -- Main Program
-local displayNumStages = -1
+local displayNumStages = 0
 local displayA = -1
 local displayB = -1
-local displayTargetJoules = -1
-local displayClosestJoules = -1
-local displayVoltage = -1
-local displayMaxVoltage = -1
-local displayMinVoltage = -1
+local displayTargetJoules = 0
+local displayClosestJoules = 0
+local displayStageVoltage = 0
+local displayMaxTotalVoltage = 0
+local displayMinTotalVoltage = 0
 
 local monitor = peripheral.wrap(MonitorSide)
 
@@ -79,19 +117,21 @@ function RefreshMonitor()
   MonitorNewline(monitor)
   monitor.write("Num Stages: "..tostring(displayNumStages))
   MonitorNewline(monitor)
-  monitor.write("Signal A: "..tostring(displayA))
+  monitor.write("Signal A: "..signaltostring(displayA))
   MonitorNewline(monitor)
-  monitor.write("Signal B: "..tostring(displayB))
+  monitor.write("Signal B: "..signaltostring(displayB))
   MonitorNewline(monitor)
-  monitor.write("Target Joules: "..tostring(displayTargetJoules))
+  monitor.write("Target Joules: "..tostring(math.floor(displayTargetJoules / 100) / 10))
   MonitorNewline(monitor)
-  monitor.write("Closest Joules: "..tostring(displayClosestJoules))
+  monitor.write("Closest Joules: "..tostring(math.floor(displayClosestJoules / 100) / 10))
   MonitorNewline(monitor)
-  monitor.write("Voltage: "..tostring(displayVoltage))
+  monitor.write("Per Stage Voltage: "..tostring(math.floor(displayStageVoltage / 100) / 10))
   MonitorNewline(monitor)
-  monitor.write("Max Voltage: "..tostring(displayMaxVoltage))
+  monitor.write("Total Voltage: "..tostring(math.floor(displayStageVoltage * displayNumStages / 100) / 10))
   MonitorNewline(monitor)
-  monitor.write("Min Voltage: "..tostring(displayMinVoltage))
+  monitor.write("Max Total Voltage: "..tostring(math.floor(displayMaxTotalVoltage / 100) / 10))
+  MonitorNewline(monitor)
+  monitor.write("Min Total Voltage: "..tostring(math.floor(displayMinTotalVoltage / 100 ) / 10))
   MonitorNewline(monitor)
 end
 
@@ -113,30 +153,30 @@ while true do
   local selection = read()
   
   if selection == "1" then
-    displayNumStages = GetUserInput("Capacitor Stages")
-    displayMaxVoltage = (250000 * displayNumStages)
-    displayMinVoltage = math.max((displayMaxVoltage * 0.3), 125000)
+    displayNumStages = tonumber(GetUserInput("Capacitor Stages"))
+    displayMaxTotalVoltage = (250000 * displayNumStages)
+    displayMinTotalVoltage = math.max((displayMaxTotalVoltage * 0.3), 125000)
   elseif selection == "2" then
-    displayTargetJoules = GetUserInput("Target Joules")
+    displayTargetJoules = tonumber(GetUserInput("Target Joules"))
     print("Calculating Closest Joules, this may take a moment.")
     displayA, displayB, displayClosestJoules = SolveForJoules(displayTargetJoules, displayNumStages)
-    displayVoltage = SignalToVoltage(displayA, displayB)
+    displayStageVoltage = SignalToVoltage(displayA, displayB)
     print("Done!")
   elseif selection == "3" then
-    displayA = GetUserInput("Signal A")
-    displayB = GetUserInput("Signal B")
-    displayVoltage = SignalToVoltage(displayA, displayB)
-    displayTargetJoules = StageVoltageToJoules(displayVoltage) * displayNumStages
+    displayA = stringtosignal(GetUserInput("Signal A"))
+    displayB = stringtosignal(GetUserInput("Signal B"))
+    displayStageVoltage = SignalToVoltage(displayA, displayB)
+    displayTargetJoules = StageVoltageToJoules(displayStageVoltage) * displayNumStages
     displayClosestJoules = displayTargetJoules
   elseif selection == "4" then
-    displayNumStages = -1
+    displayNumStages = 0
     displayA = -1
     displayB = -1
-    displayTargetJoules = -1
-    displayClosestJoules = -1
-    displayVoltage = -1
-    displayMaxVoltage = -1
-    displayMinVoltage = -1
+    displayTargetJoules = 0
+    displayClosestJoules = 0
+    displayStageVoltage = 0
+    displayMaxTotalVoltage = 0
+    displayMinTotalVoltage = 0
   else
     print("Invalid Menu Option")
   end
