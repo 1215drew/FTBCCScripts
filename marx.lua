@@ -113,7 +113,7 @@ local monitor = peripheral.wrap(MonitorSide)
 function RefreshMonitor()
   monitor.clear()
   monitor.setCursorPos(1,1)
-  monitor.write("Marx Generator Firing Computer")
+  monitor.write("Marx Gen Firing Computer")
   MonitorNewline(monitor)
   monitor.write("Num Stages: "..tostring(displayNumStages))
   MonitorNewline(monitor)
@@ -132,7 +132,10 @@ function RefreshMonitor()
   monitor.write("Max Total Voltage: "..tostring(math.floor(displayMaxTotalVoltage / 100) / 10).." kV")
   MonitorNewline(monitor)
   monitor.write("Min Total Voltage: "..tostring(math.floor(displayMinTotalVoltage / 100 ) / 10).." kV")
-  MonitorNewline(monitor)
+  if displayStageVoltage < 125000 or (displayStageVoltage * displayNumStages) < displayMinTotalVoltage then
+    MonitorNewline(monitor)
+    monitor.write("ERROR: VOLTAGE TOO LOW")
+  end
 end
 
 while true do
@@ -145,8 +148,11 @@ while true do
   
   print("Main Menu")
   print(" 1) Set Number of Capacitor Stages")
-  print(" 2) Solve for Target Joules")
-  print(" 3) Solve for Signal A and B")
+  if displayNumStages > 0 then
+    print(" 2) Solve for Target Joules")
+    print(" 3) Solve for Signal A and B")
+  end
+  
   print(" 4) Reset all Values")
   print()
   print("Enter Selection:")
@@ -156,13 +162,13 @@ while true do
     displayNumStages = tonumber(GetUserInput("Capacitor Stages"))
     displayMaxTotalVoltage = (250000 * displayNumStages)
     displayMinTotalVoltage = math.max((displayMaxTotalVoltage * 0.3), 125000)
-  elseif selection == "2" then
+  elseif selection == "2" and displayNumStages > 0 then
     displayTargetJoules = tonumber(GetUserInput("Target Joules"))
     print("Calculating Closest Joules, this may take a moment.")
     displayA, displayB, displayClosestJoules = SolveForJoules(displayTargetJoules, displayNumStages)
     displayStageVoltage = SignalToVoltage(displayA, displayB)
     print("Done!")
-  elseif selection == "3" then
+  elseif selection == "3" and displayNumStages > 0 then
     displayA = stringtosignal(GetUserInput("Signal A"))
     displayB = stringtosignal(GetUserInput("Signal B"))
     displayStageVoltage = SignalToVoltage(displayA, displayB)
